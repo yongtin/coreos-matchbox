@@ -1,0 +1,13 @@
+---
+# defaults file for coreos_matchbox
+
+coreos_matchbox:
+  user: "matchbox"
+  group: "matchbox"
+  asset_dir: "/var/lib/matchbox/assets"
+  config_dir: "/etc/matchbox"
+  san_tls: 
+  - "DNS.1:matchbox1.example.com,IP.1:192.168.1.42"
+  - "DNS.2:matchbox2.example.com,IP.1:192.168.1.43"
+  version: "v0.6.1"
+  

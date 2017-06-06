@@ -1,0 +1,55 @@
+---
+- name: create matchbox system group
+  group: 
+    name: "{{ coreos_matchbox.group }}"
+    state: present
+
+- name: create matchbox system account
+  user: 
+    name: "{{ coreos_matchbox.user }}"
+    groups: "{{ coreos_matchbox.group }}"
+
+- name: create asset directory
+  file: 
+    state: directory
+    path: "{{ coreos_matchbox.asset_dir }}"
+    owner: "{{ coreos_matchbox.user }}"
+    group: "{{ coreos_matchbox.group }}"
+
+- name: create config directory
+  file: 
+    state: directory
+    path: "{{ coreos_matchbox.config_dir }}"
+    owner: "{{ coreos_matchbox.user }}"
+    group: "{{ coreos_matchbox.group }}"
+
+- name: download openssl.conf from github matchbox
+  get_url: 
+    url: "https://raw.githubusercontent.com/coreos/matchbox/{{ coreos_matchbox.version }}/scripts/tls/openssl.conf"
+    dest: "{{ coreos_matchbox.config_dir }}/openssl.conf"
+    mode: "0644"
+  register: generate_new_tls
+
+- name: download certgen script from github matchbox
+  get_url: 
+    url: "https://raw.githubusercontent.com/coreos/matchbox/{{ coreos_matchbox.version }}/scripts/tls/cert-gen"
+    dest: "{{ coreos_matchbox.config_dir }}/cert-gen"
+    mode: "0755"
+  register: generate_new_tls
+
+- name: generate tls certs for matchbox
+  shell: "export SAN={{ coreos_matchbox.san_tls|join(',') }}; sed -i 's/fake-//g' ./cert-gen; ./cert-gen"
+  args: 
+    chdir: "{{ coreos_matchbox.config_dir }}"
+  when: generate_new_tls|changed
+
+- name: start matchbox via container
+  docker_container: 
+    name: coreos_matchbox
+    state: started
+    image: "quay.io/coreos/matchbox:{{ coreos_matchbox.version }}"
+    network_mode: host
+    command: "-address=0.0.0.0:8080 -rpc-address=0.0.0.0:8081 -log-level=debug"
+    volumes:
+    - /var/lib/matchbox:/var/lib/matchbox:Z
+    - /etc/matchbox:/etc/matchbox:Z,ro

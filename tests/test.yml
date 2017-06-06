@@ -1,0 +1,6 @@
+---
+- hosts: all
+  remote_user: root
+  roles:
+    - angstwad.docker_ubuntu
+    - coreos_matchbox
