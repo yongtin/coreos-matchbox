@@ -8,6 +8,10 @@ Vagrant.configure('2') do |config|
       ansible.sudo = true
       ansible.playbook = "tests/test.yml"
     end
+    trusty64.vm.network "forwarded_port", guest: 8080, host: 8080
+    trusty64.vm.network "forwarded_port", guest: 8081, host: 8081
+    trusty64.vm.synced_folder "/Users/tyong/.matchbox", "/etc/matchbox"
+
     trusty64.vm.provider "virtualbox" do |v|
       v.customize ['modifyvm', :id, '--cableconnected1', 'on']
     end
