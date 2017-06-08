@@ -38,7 +38,7 @@
   register: generate_new_tls
 
 - name: generate tls certs for matchbox
-  shell: "export SAN={{ coreos_matchbox.san_tls|join(',') }}; sed -i 's/fake-//g' ./cert-gen; ./cert-gen"
+  shell: "export SAN={{ coreos_matchbox.san_tls|join(',') }}; sed -i 's/fake-//g' ./cert-gen; echo $SAN > ./san-tls-info.txt; ./cert-gen"
   args: 
     chdir: "{{ coreos_matchbox.config_dir }}"
   when: generate_new_tls|changed
