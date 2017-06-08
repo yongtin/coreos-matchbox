@@ -1,0 +1,14 @@
+- name: create directory profiles
+  file: 
+    state: directory
+    path: "{{ coreos_matchbox.profiles_dir }}"
+
+- name: installing matchbox profiles
+  template: 
+    owner: "{{ coreos_matchbox.user }}"
+    group: "{{ coreos_matchbox.group }}"
+    src: "profiles.json.j2"
+    dest: "{{ coreos_matchbox.profiles_dir }}/{{ item.id }}.json"
+  with_items: "{{ matchbox.profiles }}"
+
+

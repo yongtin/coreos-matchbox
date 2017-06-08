@@ -53,3 +53,5 @@
     volumes:
     - /var/lib/matchbox:/var/lib/matchbox:Z
     - /etc/matchbox:/etc/matchbox:Z,ro
+
+- include: profiles.yml
