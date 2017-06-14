@@ -1,20 +1,21 @@
 ---
 # defaults file for coreos_matchbox
 
-coreos_matchbox:
-  user: "matchbox"
-  group: "matchbox"
-  asset_dir: "/var/lib/matchbox/assets"
-  profiles_dir: "/var/lib/matchbox/profiles"
-  groups_dir: "/var/lib/matchbox/groups"
-  ignition_templates_dir: "/var/lib/matchbox/ignition"
-  generic_templates_dir: "/var/lib/matchbox/generic"
-  config_dir: "/etc/matchbox"
-  san_tls: 
-  - "DNS.1:localhost,IP.1:127.0.0.1"
-  version: "v0.6.1"
-
 matchbox:
+  server: 
+    user: "matchbox"
+    group: "matchbox"
+    asset_dir: "/var/lib/matchbox/assets"
+    profiles_dir: "/var/lib/matchbox/profiles"
+    groups_dir: "/var/lib/matchbox/groups"
+    ignition_templates_dir: "/var/lib/matchbox/ignition"
+    generic_templates_dir: "/var/lib/matchbox/generic"
+    config_dir: "/etc/matchbox"
+    san_tls: 
+    - "DNS.1:localhost,IP.1:127.0.0.1"
+    version: "v0.6.1"
+
+
   profiles: 
   - id: install-reboot
     name: install coreos and reboot

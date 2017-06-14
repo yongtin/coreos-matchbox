@@ -1,74 +1,95 @@
 ---
 - name: create matchbox system group
   group: 
-    name: "{{ coreos_matchbox.group }}"
+    name: "{{ matchbox.server.group }}"
     state: present
 
 - name: create matchbox system account
   user: 
-    name: "{{ coreos_matchbox.user }}"
-    groups: "{{ coreos_matchbox.group }}"
+    name: "{{ matchbox.server.user }}"
+    groups: "{{ matchbox.server.group }}"
 
 - name: create asset directory
   file: 
     state: directory
-    path: "{{ coreos_matchbox.asset_dir }}"
-    owner: "{{ coreos_matchbox.user }}"
-    group: "{{ coreos_matchbox.group }}"
+    path: "{{ matchbox.server.asset_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
 
 - name: create config directory
   file: 
     state: directory
-    path: "{{ coreos_matchbox.config_dir }}"
-    owner: "{{ coreos_matchbox.user }}"
-    group: "{{ coreos_matchbox.group }}"
+    path: "{{ matchbox.server.config_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
+
+- name: create profiles directory
+  file: 
+    state: directory
+    path: "{{ matchbox.server.profiles_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
+
+- name: create ignition directory
+  file: 
+    state: directory
+    path: "{{ matchbox.server.ignition_templates_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
+
+- name: create generic directory
+  file: 
+    state: directory
+    path: "{{ matchbox.server.generic_templates_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
 
 - name: create directory groups
   file:
     state: directory
-    path: "{{ coreos_matchbox.groups_dir }}"
-    owner: "{{ coreos_matchbox.user }}"
-    group: "{{ coreos_matchbox.group }}"
+    path: "{{ matchbox.server.groups_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
 
 - name: create ignition_templates_dir directory
   file: 
     state: directory
-    path: "{{ coreos_matchbox.ignition_templates_dir }}"
-    owner: "{{ coreos_matchbox.user }}"
-    group: "{{ coreos_matchbox.group }}"
+    path: "{{ matchbox.server.ignition_templates_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
 
 - name: create generic_templates_dir directory
   file: 
     state: directory
-    path: "{{ coreos_matchbox.generic_templates_dir }}"
-    owner: "{{ coreos_matchbox.user }}"
-    group: "{{ coreos_matchbox.group }}"
+    path: "{{ matchbox.server.generic_templates_dir }}"
+    owner: "{{ matchbox.server.user }}"
+    group: "{{ matchbox.server.group }}"
 
 - name: download openssl.conf from github matchbox
   get_url: 
-    url: "https://raw.githubusercontent.com/coreos/matchbox/{{ coreos_matchbox.version }}/scripts/tls/openssl.conf"
-    dest: "{{ coreos_matchbox.config_dir }}/openssl.conf"
+    url: "https://raw.githubusercontent.com/coreos/matchbox/{{ matchbox.server.version }}/scripts/tls/openssl.conf"
+    dest: "{{ matchbox.server.config_dir }}/openssl.conf"
     mode: "0644"
   register: generate_new_tls
 
 - name: download certgen script from github matchbox
   get_url: 
-    url: "https://raw.githubusercontent.com/coreos/matchbox/{{ coreos_matchbox.version }}/scripts/tls/cert-gen"
-    dest: "{{ coreos_matchbox.config_dir }}/cert-gen"
+    url: "https://raw.githubusercontent.com/coreos/matchbox/{{ matchbox.server.version }}/scripts/tls/cert-gen"
+    dest: "{{ matchbox.server.config_dir }}/cert-gen"
     mode: "0755"
   register: generate_new_tls
 
 - name: generate tls certs for matchbox
-  shell: "export SAN={{ coreos_matchbox.san_tls|join(',') }}; sed -i 's/fake-//g' ./cert-gen; echo $SAN > ./san-tls-info.txt; ./cert-gen"
+  shell: "export SAN={{ matchbox.server.san_tls|join(',') }}; sed -i 's/fake-//g' ./cert-gen; echo $SAN > ./san-tls-info.txt; ./cert-gen"
   args: 
-    chdir: "{{ coreos_matchbox.config_dir }}"
+    chdir: "{{ matchbox.server.config_dir }}"
   when: generate_new_tls|changed
 
 - name: start matchbox via container
   docker_container: 
-    name: coreos_matchbox
+    name: matchbox.server
     state: started
-    image: "quay.io/coreos/matchbox:{{ coreos_matchbox.version }}"
+    image: "quay.io/coreos/matchbox:{{ matchbox.server.version }}"
     network_mode: host
     command: "-address=0.0.0.0:8080 -rpc-address=0.0.0.0:8081 -log-level=debug"
     volumes:
